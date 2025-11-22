@@ -1,0 +1,5 @@
+- `.env` -> `config.json`
+- Restriction system (Restrict who can use the bot)
+- Embeds
+- Port all portable Selfcord commands
+- Logging
