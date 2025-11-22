@@ -1,4 +1,4 @@
-import type { Command } from '../types.js';
+import type { Command } from '../utils/types.js';
 import {
     ChatInputCommandInteraction,
     SlashCommandBuilder,

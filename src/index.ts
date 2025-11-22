@@ -1,12 +1,15 @@
-import type { Command } from './types.js';
-import { ping } from './commands/index.js';
-import readline from 'node:readline';
+import type { Command } from './utils/types.js';
+import { 
+    ping,
+    message
+} from './commands/index.js';
 import {
     Client,
     GatewayIntentBits,
     Collection,
     Events,
-    Interaction
+    Interaction,
+    Message
 } from 'discord.js';
 import dotenv from 'dotenv';
 
@@ -15,35 +18,35 @@ console.clear();
 
 const client = new Client({
     intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
         GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.MessageContent
     ],
 });
 
 client.commands = new Collection<string, Command>();
 client.commands.set(ping.data.name, ping);
+client.commands.set(message.data.name, message);
 
 client.once(Events.ClientReady, (c) => {
     console.log(`Logged in as ${c.user.tag}`);
-    console.log('message <user_id> <message>');
-    meow();
 });
 
 client.on(Events.InteractionCreate, async (interaction: Interaction) => {
     if (!interaction.isChatInputCommand()) return;
-
     const command = client.commands.get(interaction.commandName);
 
     if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found`);
+        console.error(`Command ${interaction.commandName} not found`);
         return;
     }
+
+    const user = interaction.user;
+    console.log(`${user.tag} (${user.id}) executed ${interaction.commandName}`);
 
     try {
         await command.execute(interaction);
     } catch (err) {
-        console.error('Error executing command:', err);
+        console.error(`Error executing command ${interaction.commandName}: ${err}`);
 
         const reply = { 
             content: 'There was an error executing this command', 
@@ -58,59 +61,14 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
     }
 });
 
-function meow() {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        prompt: '> ',
-    });
+client.on(Events.MessageCreate, (message: Message) => {
+    if (message.author.bot) return;
 
-    rl.prompt();
+    const user = message.author;
+    const content = message.content || '[No text content]';
 
-    rl.on('line', async (line) => {
-        const input = line.trim();
-
-        if (!input) {
-            rl.prompt();
-            return;
-        }
-
-        const regex = input.match(/^message\s+(\S+)\s+(.+)$/);
-
-        if (regex) {
-            const [, uid, message] = regex;
-
-            await sendMessage(uid, message);
-            rl.prompt();
-
-            return;
-        }
-
-        console.log('Unknown command');
-        rl.prompt();
-    });
-}
-async function sendMessage(uid: string, message: string) {
-    try {
-        const user = await client.users.fetch(uid);
-
-        await user.send(message);
-        console.log(`Message sent to ${user.tag} (${uid})`);
-    } catch (err) {
-        // :sob:
-        if (err instanceof Error) {
-            if (err.message.includes('Cannot send messages to this user')) {
-                console.error(`Cannot send message to user ${uid}`);
-            } else if (err.message.includes('Unknown User')) {
-                console.error(`User ${uid} not found`);
-            } else {
-                console.error(`Error sending message: ${err.message}`);
-            }
-        } else {
-            console.error('Unknown error occurred');
-        }
-    }
-}
+    console.log(`${user.tag} (${user.id}) sent a message: ${content}`);
+});
 
 const token = process.env.DISCORD_TOKEN;
 
