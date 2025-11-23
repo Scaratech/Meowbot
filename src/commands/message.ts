@@ -24,7 +24,8 @@ export const message: Command = {
         )
         .setContexts([
             InteractionContextType.BotDM,
-            InteractionContextType.PrivateChannel
+            InteractionContextType.PrivateChannel,
+            InteractionContextType.Guild
         ])
         .setIntegrationTypes([1])
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),

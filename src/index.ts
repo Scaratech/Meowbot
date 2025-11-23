@@ -1,8 +1,10 @@
 import type { Command } from './utils/types.js';
 import { 
     ping,
-    message
+    message,
+    auth
 } from './commands/index.js';
+import { isAuthorized } from './utils/auth.js';
 import {
     Client,
     GatewayIntentBits,
@@ -26,6 +28,7 @@ const client = new Client({
 client.commands = new Collection<string, Command>();
 client.commands.set(ping.data.name, ping);
 client.commands.set(message.data.name, message);
+client.commands.set(auth.data.name, auth);
 
 client.once(Events.ClientReady, (c) => {
     console.log(`Logged in as ${c.user.tag}`);
@@ -41,6 +44,42 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
     }
 
     const user = interaction.user;
+    
+    if (interaction.commandName === 'auth') {
+        const ownerId = process.env.OWNER;
+        
+        if (!ownerId) {
+            console.error('OWNER not set in .env');
+
+            await interaction.reply({
+                content: 'Owner not configured',
+                ephemeral: true
+            });
+
+            return;
+        }
+        
+        if (user.id !== ownerId) {
+            console.log(`${user.tag} (${user.id}) attempted to use /auth but is not the owner`);
+
+            await interaction.reply({
+                content: 'You are not authorized to use this command',
+                ephemeral: true
+            });
+
+            return;
+        }
+    } else if (!isAuthorized(user.id)) {
+        console.log(`${user.tag} (${user.id}) attempted to execute ${interaction.commandName} but is not authorized`);
+
+        await interaction.reply({
+            content: 'You are not authorized to use this command',
+            ephemeral: true
+        });
+
+        return;
+    }
+
     console.log(`${user.tag} (${user.id}) executed ${interaction.commandName}`);
 
     try {

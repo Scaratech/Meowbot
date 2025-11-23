@@ -23,8 +23,8 @@ $ pnpm build
 ```
 DISCORD_TOKEN=your_bot_token_here
 CLIENT_ID=your_client_id_here
+OWNER=your_discord_user_id_here
 ```
 ```sh
 $ pnpm deploy
 $ pnpm start
-```

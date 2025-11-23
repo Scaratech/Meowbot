@@ -14,7 +14,7 @@ export const ping: Command = {
             InteractionContextType.PrivateChannel,
             InteractionContextType.Guild
         ])
-        .setIntegrationTypes([1]), // User Install
+        .setIntegrationTypes([1]),
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();

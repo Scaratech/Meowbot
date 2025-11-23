@@ -1,4 +1,4 @@
-import { ping, message } from './commands/index.js';
+import { ping, message, auth } from './commands/index.js';
 import { REST, Routes } from 'discord.js';
 import dotenv from 'dotenv';
 
@@ -7,6 +7,7 @@ dotenv.config();
 const commands = [
     ping.data.toJSON(),
     message.data.toJSON(),
+    auth.data.toJSON(),
 ];
 
 const token = process.env.DISCORD_TOKEN;
