@@ -11,7 +11,8 @@ import {
     Collection,
     Events,
     Interaction,
-    Message
+    Message,
+    Partials
 } from 'discord.js';
 import dotenv from 'dotenv';
 
@@ -23,6 +24,7 @@ const client = new Client({
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.MessageContent
     ],
+    partials: [Partials.Channel]
 });
 
 client.commands = new Collection<string, Command>();
